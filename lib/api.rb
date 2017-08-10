@@ -14,14 +14,12 @@ class API
 
   def initialize(page: 1)
     @current_page = page
-
-    make_request
   end
 
   def next_page
     @current_page += 1
     make_request
-    spaces
+    parse_response
   end
 
   def previous_page
@@ -29,13 +27,36 @@ class API
 
     @current_page -= 1
     make_request
-    spaces
+    parse_response
   end
 
-  def sorted(attribute_name, descending: true)
-    result = spaces.sort_by { |space| space.send(attribute_name) }
+  # Returns all spaces sorted by given attribute
+  def sorted(attribute_name, descending: false)
+    spaces = all_spaces
+
+    # Select spaces with non-nil values
+    result = spaces.select { |space| !space.send(attribute_name).nil? }
+      .sort_by { |space| space.send(attribute_name) }
     result.reverse! if descending
+
     result
+  end
+
+  # Get spaces from all pages
+  def all_spaces
+    # Reset attributes
+    temp_page = @current_page
+    @spaces = []
+    @current_page = 1
+    # Pull data from all pages
+    make_request
+    while @response != nil
+      @spaces += parse_response
+      next_page
+    end
+    # Return spaces and reset current page number
+    @current_page = temp_page
+    @spaces
   end
 
   private
@@ -45,14 +66,21 @@ class API
     BASE_URL + "?page=#{@current_page}"
   end
 
-  # Performs request and update instance data
+  # Performs request and updates instance data
   def make_request
     response = HTTParty.get(spaces_url, format: :json)
-
-    @spaces = response['data'].map { |space| Space.new(space) }
-    @page_size = response['page_size']
-    @total = response['total']
+    @response = response.success? ? response : nil
   rescue
-    @spaces = []
+    @response = nil
+  end
+
+  # Parses response and returnes spaces
+  def parse_response
+    @page_size = @response['page_size']
+    @total = @response['total']
+
+    @response['data'].map { |space| Space.new(space) }
+  rescue
+    []
   end
 end
