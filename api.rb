@@ -32,6 +32,12 @@ class API
     spaces
   end
 
+  def sorted(attribute_name, descending: true)
+    result = spaces.sort_by { |space| space.send(attribute_name) }
+    result.reverse! if descending
+    result
+  end
+
   private
 
   # URL with page parameter
