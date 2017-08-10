@@ -14,6 +14,8 @@ class API
 
   def initialize(page: 1)
     @current_page = page
+    make_request
+    @spaces = parse_response
   end
 
   def next_page
@@ -40,6 +42,18 @@ class API
     result.reverse! if descending
 
     result
+  end
+
+  def find_similar(current_space, attribute_name, delta: 100)
+    spaces = all_spaces
+
+    result = spaces
+      .select { |space| !space.send(attribute_name).nil? }
+      .select do |space|
+        (space.send(attribute_name) - current_space.send(attribute_name)).abs < delta
+      end
+
+      result
   end
 
   # Get spaces from all pages
