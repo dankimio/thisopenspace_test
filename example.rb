@@ -1,7 +1,7 @@
 # Require API
 require_relative 'lib/api'
 # Initialize API instance with page parameter (optional)
-api = API.new(page: 1)
+api = API.new
 # Access results
 api.spaces
 # Navigate through pages

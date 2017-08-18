@@ -44,16 +44,28 @@ class API
     result
   end
 
-  def find_similar(current_space, attribute_name, delta: 100)
-    spaces = all_spaces
+  def filter(query)
+    spaces = @result || all_spaces
 
-    result = spaces
+    @result = spaces.select do |space|
+      space.name =~ /#{query}/i
+    end
+  end
+
+  def clear_filters
+    @result = nil
+  end
+
+  def find_similar(current_space, attribute_name, delta: 100)
+    spaces = @result || all_spaces
+
+    @result = spaces
       .select { |space| !space.send(attribute_name).nil? }
       .select do |space|
         (space.send(attribute_name) - current_space.send(attribute_name)).abs < delta
       end
 
-      result
+    @result
   end
 
   # Get spaces from all pages
