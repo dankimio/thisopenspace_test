@@ -6,11 +6,9 @@ require_relative 'space'
 # api.spaces
 # api.next_page
 class API
-  BASE_URL = 'https://thisopenspace.com/lhl-test'
+  BASE_URL = 'https://thisopenspace.com/lhl-test'.freeze
 
-  attr_reader :spaces
-  attr_reader :current_page
-  attr_reader :page_size, :total
+  attr_reader :spaces, :current_page, :page_size, :total
 
   def initialize(page: 1)
     @current_page = page
@@ -37,7 +35,7 @@ class API
     spaces = all_spaces
 
     # Select spaces with non-nil values
-    result = spaces.select { |space| !space.send(attribute_name).nil? }
+    result = spaces.reject { |space| space.send(attribute_name).nil? }
       .sort_by { |space| space.send(attribute_name) }
     result.reverse! if descending
 
@@ -60,7 +58,7 @@ class API
     spaces = @result || all_spaces
 
     @result = spaces
-      .select { |space| !space.send(attribute_name).nil? }
+      .reject { |space| space.send(attribute_name).nil? }
       .select do |space|
         (space.send(attribute_name) - current_space.send(attribute_name)).abs < delta
       end
@@ -76,7 +74,7 @@ class API
     @current_page = 1
     # Pull data from all pages
     make_request
-    while @response != nil
+    until @response.nil?
       @spaces += parse_response
       next_page
     end
@@ -96,7 +94,7 @@ class API
   def make_request
     response = HTTParty.get(spaces_url, format: :json)
     @response = response.success? ? response : nil
-  rescue
+  rescue StandardError
     @response = nil
   end
 
@@ -106,7 +104,7 @@ class API
     @total = @response['total']
 
     @response['data'].map { |space| Space.new(space) }
-  rescue
+  rescue StandardError
     []
   end
 end
