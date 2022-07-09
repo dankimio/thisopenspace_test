@@ -2,15 +2,15 @@
 
 ## Instructions
 
-1. Run `$ bundle`
+1. Run `$ bundle install`
 2. Modify and run example script: `$ ruby example.rb`
 
 ## Run in console
 
-1. Run `$ bundle`
-2. Open the console `$ irb` from current directory
-3. Require API class: `require_relative 'lib/api'`
-4. Instantiate API: `api = API.new` (see example)
+1. Run `$ bundle install`
+2. Open the console: `$ irb`
+3. Require API: `require_relative 'lib/api'`
+4. Create API instance: `api = API.new`
 
 ## Sort
 
